@@ -1,5 +1,9 @@
 FROM ruby:latest
 
+# Set encoding
+# See: https://github.com/docker-library/docs/tree/master/ruby#encoding
+ENV LANG C.UTF-8
+
 # Add MariaDB Repo
 RUN apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 0xcbcb082a1bb943db \
     && sh -c 'echo "deb http://nyc2.mirrors.digitalocean.com/mariadb/repo/10.2/debian jessie main" >> /etc/apt/sources.list.d/mariadb.list'
@@ -72,7 +76,3 @@ RUN bundle config github.https true
 # Set Rails to run in production
 ENV RAILS_ENV test
 ENV RACK_ENV test
-
-# Encoding
-ENV LANG en_US.UTF-8
-ENV LC_ALL en_US.UTF-8
