@@ -1,0 +1,74 @@
+image: dsexton/rails-ci:ruby-2.4
+
+cache:
+  key: "$CI_COMMIT_REF_SLUG/cache"
+  paths:
+    - .bundle
+    - node_modules
+    - vendor/ruby
+
+stages:
+  - prepare
+  - test
+  - audit
+  - lint
+
+variables:
+  DATABASE_HOST: localhost
+  POSTGRES_PASSWORD: password
+
+before_script:
+  - bundle check --path vendor
+  - bundle exec bin/yarn check
+  - cp .env.example .env
+
+bundle:
+  stage: prepare
+  before_script: []
+  script:
+    - ruby -v
+    - bundle --version
+    - bundle install --path vendor --jobs $(nproc)
+    - bundle clean --force
+    - bundle exec bin/yarn install
+    - psql --version
+
+rspec:
+  services:
+    - postgres:9.6
+    - redis:3.2
+  script:
+    - bundle exec bin/webpack --color
+    - bundle exec rails db:create db:migrate
+    - bundle exec rspec --format documentation --color --tty
+  variables:
+    SIMPLECOV: "true"
+  artifacts:
+    name: coverage
+    expire_in: 31d
+    paths:
+      - coverage/
+
+brakeman:
+  script: bundle exec brakeman -w2 -z -f plain --color
+  stage: audit
+
+bundler_audit:
+  script: bundle exec bundle-audit check --update
+  stage: audit
+
+rubocop:
+  script: bundle exec rubocop --color
+  stage: lint
+
+haml_lint:
+  script: bundle exec haml-lint --color app/**/*.haml
+  stage: lint
+
+eslint:
+  script: bundle exec bin/yarn run eslint app/javascript
+  stage: lint
+
+scss_lint:
+  script: bundle exec scss-lint --color
+  stage: lint

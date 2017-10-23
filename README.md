@@ -43,10 +43,6 @@ All images contain:
   - `RAILS_ENV=test`
   - `RACK_ENV=test`
 
-## Rake Tasks
+## Gitlab CI Example
 
-There are several rake tasks for building and pushing images.
-
-To see a full list of tasks run:
-
-- `$ rake -T`
+I have included a [Gitlab CI](https://about.gitlab.com/features/gitlab-ci-cd/) configuration example [here](.gitlab-ci.yaml) from a Ruby on Rails 5.1 project using Postgres.
