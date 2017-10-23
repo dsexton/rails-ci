@@ -74,3 +74,7 @@ RUN bundle config github.https true
 # Set Rails to run in production
 ENV RAILS_ENV test
 ENV RACK_ENV test
+
+# Encoding
+ENV LANG en_US.UTF-8
+ENV LC_ALL en_US.UTF-8
