@@ -14,10 +14,14 @@ RUN apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 0xcbcb082a1bb943db 
 RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - \
     && sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ jessie-pgdg main" >> /etc/apt/sources.list.d/pgdg.list'
 
+# Add Official ZeroMQ
+RUN wget --quiet -O - https://download.opensuse.org/repositories/network:/messaging:/zeromq:/git-stable/Debian_8.0/Release.key | apt-key add - \
+    && sh -c 'echo "deb http://download.opensuse.org/repositories/network:/messaging:/zeromq:/git-stable/Debian_8.0/ ./" >> /etc/apt/sources.list.d/zmq.list'
+
 # Install system dependencies
 RUN apt-get update -qq && apt-get -qq install -y \
-    curl ca-certificates bzip2 imagemagick jq libfontconfig \
-    libmariadbd-dev libpq-dev mariadb-client postgresql-client xz-utils \
+    curl ca-certificates bzip2 imagemagick jq libfontconfig libzmq3-dev libmariadbd-dev \
+    libpq-dev mariadb-client net-tools postgresql-client tcpdump xz-utils \
     --no-install-recommends && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Docker
