@@ -17,7 +17,7 @@ RUN wget --quiet -O - https://download.opensuse.org/repositories/network:/messag
     && sh -c 'echo "deb http://download.opensuse.org/repositories/network:/messaging:/zeromq:/git-stable/Debian_8.0/ ./" >> /etc/apt/sources.list.d/zmq.list'
 
 # Install system dependencies
-RUN apt-get update -qq && apt-get -qq install -y \
+RUN set -ex; apt-get update -qq && apt-get -qq install -y \
     curl ca-certificates bzip2 imagemagick jq libfontconfig libzmq3-dev libmariadbd-dev \
     libpq-dev mariadb-client net-tools postgresql-client tcpdump xz-utils \
     --no-install-recommends && apt-get clean && rm -rf /var/lib/apt/lists/*
