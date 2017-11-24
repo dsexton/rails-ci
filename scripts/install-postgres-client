@@ -1,0 +1,23 @@
+#!/bin/bash
+
+set -xeo pipefail
+
+# Postgres
+# https://hub.docker.com/_/postgres/
+
+key='B97B0AFCAA1A47F044F244A07FCC7D46ACCC4CF8'
+export GNUPGHOME="$(mktemp -d)"
+gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"
+gpg --export "$key" > /etc/apt/trusted.gpg.d/postgres.gpg
+rm -rf "$GNUPGHOME"
+apt-key list
+
+PG_MAJOR=${1:-9.6}
+PG_VERSION=${2:-9.6.6-1.pgdg80+1}
+
+echo "deb http://apt.postgresql.org/pub/repos/apt/ jessie-pgdg main $PG_MAJOR" > /etc/apt/sources.list.d/pgdg.list
+
+apt-get update -qq
+apt-get install -qq -y --no-install-recommends \
+  libpq-dev \
+  postgresql-client

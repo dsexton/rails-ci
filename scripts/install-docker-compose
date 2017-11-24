@@ -1,0 +1,16 @@
+#!/bin/bash
+
+set -xeo pipefail
+
+# Docker Compose
+# https://docs.docker.com/compose/install/#install-compose
+
+DOCKER_COMPOSE_VERSION=${1:-1.17.0}
+DOCKER_ARCH_VERSION=x86_64
+
+if ! curl -fL -o /usr/local/bin/docker-compose "https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-Linux-${DOCKER_ARCH_VERSION}"; then
+  echo >&2 "error: failed to download 'docker-compose-${DOCKER_COMPOSE_VERSION}' for '${DOCKER_ARCH}'";
+  exit 1
+fi
+
+chmod +x /usr/local/bin/docker-compose

@@ -1,0 +1,21 @@
+#!/bin/bash
+
+set -xeo pipefail
+
+# Docker
+# https://hub.docker.com/_/docker/
+
+DOCKER_CHANNEL=${1:-stable}
+DOCKER_VERSION=${2:-17.09.0-ce}
+# TODO ENV DOCKER_SHA256
+# https://github.com/docker/docker-ce/blob/5b073ee2cf564edee5adca05eee574142f7627bb/components/packaging/static/hash_files !!
+# (no SHA file artifacts on download.docker.com yet as of 2017-06-07 though)
+DOCKER_ARCH=x86_64
+
+if ! curl -fL -o docker.tgz "https://download.docker.com/linux/static/${DOCKER_CHANNEL}/${DOCKER_ARCH}/docker-${DOCKER_VERSION}.tgz"; then
+  echo >&2 "error: failed to download 'docker-${DOCKER_VERSION}' from '${DOCKER_CHANNEL}' for '${DOCKER_ARCH}'";
+  exit 1
+fi
+
+tar --extract --file docker.tgz --strip-components 1 --directory /usr/local/bin/
+rm docker.tgz

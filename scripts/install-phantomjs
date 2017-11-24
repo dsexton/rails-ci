@@ -1,0 +1,12 @@
+#!/bin/bash
+
+set -xeo pipefail
+
+# Install phantomjs
+PHANTOMJS_VERSION=${1:-2.1.1}
+
+curl -SLO "https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2"
+mkdir "phantomjs-$PHANTOMJS_VERSION-linux-x86_64"
+tar -jxvf "phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2" -C "phantomjs-$PHANTOMJS_VERSION-linux-x86_64" --strip-components=1
+mv "phantomjs-$PHANTOMJS_VERSION-linux-x86_64/bin/phantomjs" /usr/local/bin
+rm -rf "phantomjs-$PHANTOMJS_VERSION-linux-x86_64" "phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2"

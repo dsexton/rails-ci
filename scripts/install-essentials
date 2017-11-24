@@ -1,0 +1,54 @@
+#!/bin/bash
+
+set -xeo pipefail
+
+apt-get update -qq
+apt-get install -qq -y --no-install-recommends ca-certificates wget
+
+# grab gosu for easy step-down from root
+export GOSU_VERSION=1.10
+wget -O /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$(dpkg --print-architecture)"
+wget -O /usr/local/bin/gosu.asc "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$(dpkg --print-architecture).asc"
+export GNUPGHOME="$(mktemp -d)"
+gpg --keyserver ha.pool.sks-keyservers.net --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4
+gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu
+rm -rf "$GNUPGHOME" /usr/local/bin/gosu.asc
+chmod +x /usr/local/bin/gosu
+gosu nobody true
+
+apt-get update -qq
+apt-get install -qq -y --no-install-recommends \
+  bzip2 \
+  ca-certificates \
+  curl \
+  dirmngr \
+  gnupg \
+  htop \
+  imagemagick \
+  jq \
+  libfontconfig \
+  locales \
+  net-tools \
+  tcpdump \
+  unzip \
+  xz-utils
+
+echo deb http://httpredir.debian.org/debian stretch main > /etc/apt/sources.list.d/stretch.list
+apt-get update -yqqq
+apt-get install -yqq --force-yes git
+
+rm /etc/apt/sources.list.d/stretch.list
+apt-get update -yqqq
+apt-get clean -yqq
+
+# Set UTF-8
+# http://stackoverflow.com/a/3182519/2137281
+LOC=$'LC_ALL=en_US.UTF-8\nLANG=en_US.UTF-8'
+echo "$LOC" > /etc/environment
+cat /etc/environment
+echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
+locale-gen
+dpkg-reconfigure locales -f noninteractive -p critical
+locale -a
+
+rm -rf /var/lib/apt/lists/*

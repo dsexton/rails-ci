@@ -1,0 +1,77 @@
+#!/bin/bash
+
+set -xeo pipefail
+
+# skip installing gem documentation
+mkdir -p /usr/local/etc
+
+{
+	echo 'install: --no-document';
+	echo 'update: --no-document';
+} >> /usr/local/etc/gemrc
+
+RUBY_MAJOR=${1:-2.4}
+RUBY_VERSION=${2:-2.4.2}
+RUBYGEMS_VERSION=${3:-2.7.2}
+BUNDLER_VERSION=${4:-1.16.0}
+
+# some of ruby's build scripts are written in ruby
+#   we purge system ruby later to make sure our final image uses what we just built
+buildDeps='
+	bison
+	dpkg-dev
+	libgdbm-dev
+	ruby
+'
+
+apt-get update
+apt-get install -y --no-install-recommends $buildDeps
+rm -rf /var/lib/apt/lists/*
+
+wget -O ruby.tar.xz "https://cache.ruby-lang.org/pub/ruby/${RUBY_MAJOR%-rc}/ruby-$RUBY_VERSION.tar.xz"
+mkdir -p /usr/src/ruby
+tar -xJf ruby.tar.xz -C /usr/src/ruby --strip-components=1
+rm ruby.tar.xz
+
+cd /usr/src/ruby
+
+{ \
+  echo '#define ENABLE_PATH_CHECK 0'; \
+  echo; \
+  cat file.c; \
+} > file.c.new
+mv file.c.new file.c
+
+autoconf
+gnuArch="$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)"
+./configure \
+	--build="$gnuArch" \
+	--disable-install-doc \
+	--enable-shared
+
+make -j "$(nproc)"
+make install
+apt-get purge -y --auto-remove $buildDeps
+cd /
+rm -r /usr/src/ruby
+
+gem update --system "$RUBYGEMS_VERSION"
+gem install bundler --version "$BUNDLER_VERSION" --force
+
+# install things globally, for great justice
+# and don't create ".bundle" in all our apps
+export GEM_HOME=/usr/local/bundle
+export BUNDLE_PATH="$GEM_HOME"
+export BUNDLE_BIN="$GEM_HOME/bin"
+export BUNDLE_SILENCE_ROOT_WARNING=1
+export BUNDLE_APP_CONFIG="$GEM_HOME"
+export PATH $BUNDLE_BIN:$PATH
+
+mkdir -p "$GEM_HOME" "$BUNDLE_BIN" && chmod 777 "$GEM_HOME" "$BUNDLE_BIN"
+
+# Bug with bundler 1.13
+# See: https://github.com/bundler/bundler/issues/5005
+bundle config disable_exec_load true
+
+# Use HTTPS instead of SSH
+bundle config github.https true

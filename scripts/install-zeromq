@@ -1,0 +1,13 @@
+#!/bin/bash
+
+set -xeo pipefail
+
+# Add Official ZeroMQ Repo
+key='0080689BE757A876CB7DC26962EB1A0917280DDF' 
+export GNUPGHOME="$(mktemp -d)"
+gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"
+gpg --export "$key" > /etc/apt/trusted.gpg.d/zmq.gpg
+rm -r "$GNUPGHOME"
+apt-key list > /dev/null
+
+RUN set -ex; sh -c 'echo "deb http://download.opensuse.org/repositories/network:/messaging:/zeromq:/git-stable/Debian_8.0/ ./" >> /etc/apt/sources.list.d/zmq.list'
