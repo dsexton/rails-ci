@@ -31,7 +31,12 @@ namespace :build do
     RUBIES.each do |major, versions|
       versions.each_with_index do |version, version_index|
         FLAVORS.each_with_index do |flavor, flavor_index|
-          sh "docker pull dsexton/rails-ci:ruby-#{version}-#{flavor}"
+          begin
+            sh "docker pull dsexton/rails-ci:ruby-#{version}-#{flavor}"
+          rescue Exception
+            puts "dsexton/rails-ci:ruby-#{version}-#{flavor} does not exist yet"
+          end
+
           sh "docker build -t dsexton/rails-ci:ruby-#{version}-#{flavor} \
               --file #{flavor}/Dockerfile \
               --build-arg RUBY_INSTALL_MAJOR=#{major} \
