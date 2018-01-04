@@ -11,6 +11,7 @@ before_install:
   - sudo apt-get update
   - sudo apt-get -y install docker-ce
   - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
+  - docker login -u "$QUAY_USERNAME" -p "$QUAY_PASSWORD" quay.io
   - docker pull dsexton/rails-ci:onbuild
 
 script:

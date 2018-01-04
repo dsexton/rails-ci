@@ -12,10 +12,12 @@ FLAVORS = [
 
 def push(tag)
   sh "docker push dsexton/rails-ci:#{tag}"
+  sh "docker push quay.io/dsexton/rails-ci:#{tag}"
 end
 
 def tag(what, with)
   sh "docker tag dsexton/rails-ci:#{what} dsexton/rails-ci:#{with}"
+  sh "docker tag dsexton/rails-ci:#{with} quay.io/dsexton/rails-ci:#{with}"
 end
 
 namespace :build do
@@ -24,6 +26,7 @@ namespace :build do
     sh "docker build -t dsexton/rails-ci:onbuild \
         --file onbuild/Dockerfile \
         --pull ."
+    sh "docker tag dsexton/rails-ci:onbuild quay.io/dsexton/rails-ci:onbuild"
     push('onbuild')
   end
 
@@ -42,6 +45,7 @@ namespace :build do
               --file #{flavor}/Dockerfile \
               --build-arg RUBY_INSTALL_MAJOR=#{major} \
               --build-arg RUBY_INSTALL_VERSION=#{version} ."
+          sh "docker tag dsexton/rails-ci:ruby-#{version}-#{flavor} quay.io/dsexton/rails-ci:ruby-#{version}-#{flavor}"
           push("ruby-#{version}-#{flavor}")
 
           next unless version_index == (versions.size - 1)
