@@ -1,4 +1,5 @@
 RUBIES = {
+  '2.5' => %w[2.5.0],
   '2.4' => %w[2.4.0 2.4.1 2.4.2 2.4.3],
   '2.3' => %w[2.3.3 2.3.4 2.3.5 2.3.6]
 }.freeze
@@ -50,6 +51,10 @@ namespace :build do
           next unless flavor_index == (FLAVORS.size - 1)
           tag("ruby-#{major}-#{flavor}", "ruby-#{major}")
           push("ruby-#{major}")
+
+          next unless major == '2.5'
+          tag("ruby-#{major}", 'latest')
+          push('latest')
         end
       end
     end
